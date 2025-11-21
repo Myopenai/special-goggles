@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <title>TEL1 · Hub · Live · Code · Inclusion</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta
+    name="description"
+    content="TEL1 · Raymond Dimitrio · Musik, Entwicklung, Kommunikation & Inklusion. Zentraler Hub für TEL1.nl, Projekte, Social Media & Tools."
+  />
+  <style>
+    :root {
+      --bg-dark: #05060a;
+      --bg-card: #0e1018;
+      --bg-card-soft: #151827;
+      --accent: #00f0ff;
+      --accent-soft: rgba(0, 240, 255, 0.12);
+      --text-main: #f5f5f7;
+      --text-muted: #a4a7b8;
+      --danger: #ff3366;
+      --radius-xl: 24px;
+      --transition-fast: 0.3s ease;
+      --shadow-soft: 0 18px 45px rgba(0, 0, 0, 0.6);
+      --font-main: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        sans-serif;
+      --max-width: 1100px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html,
+    body {
+      height: 100%;
+      background: radial-gradient(circle at top, #15192d 0, #020309 60%);
+      color: var(--text-main);
+      font-family: var(--font-main);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      overflow: hidden; /* während Intro */
+    }
+
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    /* ------------------------------ INTRO ------------------------------ */
+
+    #intro {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #000;
+      z-index: 9999;
+      overflow: hidden;
+    }
+
+    /* Video-Hintergrund: bitte Datei im src-Attribut im <video> ersetzen */
+    #intro video {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: brightness(0.6) contrast(1.2);
+    }
+
+    .intro-overlay {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(
+        circle at center,
+        rgba(0, 0, 0, 0) 0,
+        rgba(0, 0, 0, 0.8) 70%
+      );
+    }
+
+    .intro-logo {
+      position: absolute;
+      top: 7%;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 1.1rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      opacity: 0.85;
+    }
+
+    #phone-sequence {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.6rem;
+      text-align: center;
+      opacity: 0;
+      transform: scale(0.7);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+
+    #phone-sequence.active {
+      opacity: 1;
+      transform: scale(1);
+      animation: numberZoom 10s linear forwards;
+    }
+
+    .phone-label {
+      font-size: 0.9rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+
+    .phone-number-main {
+      font-size: clamp(2.8rem, 8vw, 4.4rem);
+      font-weight: 800;
+      text-shadow: 0 0 20px rgba(0, 240, 255, 0.7);
+      line-height: 1.15;
+    }
+
+    .phone-number-main span.ext {
+      font-size: 0.8em;
+      display: block;
+      margin-bottom: 0.4rem;
+      color: #ffb347;
+      letter-spacing: 0.12em;
+    }
+
+    .countdown-shell {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.6rem 1.2rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(14px);
+      gap: 0.6rem;
+      font-size: 0.95rem;
+      color: var(--text-muted);
+    }
+
+    .countdown-shell span#countdown {
+      font-weight: 700;
+      font-size: 1.2rem;
+      padding: 0 0.5rem;
+      min-width: 2ch;
+      text-align: center;
+      color: var(--accent);
+    }
+
+    .countdown-shell small {
+      opacity: 0.7;
+    }
+
+    @keyframes numberZoom {
+      0% {
+        transform: scale(1);
+      }
+      100% {
+        transform: scale(1.35);
+      }
+    }
+
+    /* Explosion-Effekt beim Übergang */
+
+    #intro.explode {
+      animation: introExplode 0.9s ease-out forwards;
+    }
+
+    @keyframes introExplode {
+      0% {
+        opacity: 1;
+        filter: blur(0);
+        transform: scale(1);
+      }
+      40% {
+        opacity: 1;
+        filter: blur(3px);
+        transform: scale(1.15);
+      }
+      100% {
+        opacity: 0;
+        filter: blur(18px);
+        transform: scale(1.4);
+      }
+    }
+
+    /* ------------------------------ MAIN APP --------------------------- */
+
+    #app {
+      position: relative;
+      min-height: 100vh;
+      padding: 1.5rem;
+      opacity: 0;
+      transform: translateY(10px);
+      pointer-events: none;
+      transition: opacity 0.8s ease, transform 0.8s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    #app.visible {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    .app-shell {
+      width: 100%;
+      max-width: var(--max-width);
+      margin: 0 auto 3rem;
+    }
+
+    header.app-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.5rem;
+      margin-bottom: 1.8rem;
+    }
+
+    .brand-block {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .brand-mark {
+      width: 44px;
+      height: 44px;
+      border-radius: 18px;
+      background: radial-gradient(circle at 20% 20%, #00f0ff, #4b0082);
+      box-shadow: var(--shadow-soft);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 1.4rem;
+      color: #ffffff;
+    }
+
+    .brand-text {
+      display: flex;
+      flex-direction: column;
+      gap: 0.1rem;
+    }
+
+    .brand-text strong {
+      font-size: 1.2rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+
+    .brand-text span {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    nav.main-nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      justify-content: flex-end;
+    }
+
+    nav.main-nav a {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      padding: 0.4rem 0.8rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      background: rgba(10, 12, 22, 0.7);
+      backdrop-filter: blur(12px);
+      color: var(--text-muted);
+      transition: background var(--transition-fast), color var(--transition-fast),
+        transform 0.15s ease, border-color var(--transition-fast);
+    }
+
+    nav.main-nav a:hover {
+      background: var(--accent-soft);
+      border-color: var(--accent);
+      color: var(--text-main);
+      transform: translateY(-1px);
+    }
+
+    .language-hint {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-align: right;
+      margin-bottom: 0.8rem;
+    }
+
+    /* ------------------------------ SECTIONS --------------------------- */
+
+    main {
+      display: grid;
+      grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+      gap: 1.5rem;
+    }
+
+    @media (max-width: 900px) {
+      main {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .hero-card {
+      background: radial-gradient(circle at top left, #1c2136, #05060a);
+      border-radius: var(--radius-xl);
+      padding: 2rem;
+      box-shadow: var(--shadow-soft);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.2rem 0.8rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      background: rgba(0, 0, 0, 0.4);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+    }
+
+    .hero-pill span.dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #00ff99;
+      box-shadow: 0 0 8px #00ff99;
+    }
+
+    .hero-title {
+      font-size: clamp(2.1rem, 4vw, 2.7rem);
+      margin-bottom: 0.5rem;
+    }
+
+    .hero-subtitle {
+      font-size: 1rem;
+      color: var(--text-muted);
+      margin-bottom: 1.2rem;
+    }
+
+    .hero-subtitle span {
+      display: block;
+    }
+
+    .hero-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-bottom: 1.6rem;
+    }
+
+    .hero-tags span {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.13em;
+      padding: 0.3rem 0.7rem;
+      border-radius: 999px;
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: var(--text-muted);
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+    }
+
+    .btn-primary,
+    .btn-ghost {
+      padding: 0.6rem 1.1rem;
+      border-radius: 999px;
+      font-size: 0.9rem;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      transition: transform 0.15s ease, box-shadow 0.15s ease,
+        background var(--transition-fast);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #00f0ff, #ff3cf0);
+      color: #05060a;
+      box-shadow: 0 14px 30px rgba(0, 0, 0, 0.7);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.85);
+    }
+
+    .btn-ghost {
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      color: var(--text-muted);
+    }
+
+    .btn-ghost:hover {
+      background: rgba(255, 255, 255, 0.05);
+      transform: translateY(-1px);
+    }
+
+    .right-column {
+      display: grid;
+      grid-template-rows: auto auto;
+      gap: 1.2rem;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border-radius: var(--radius-xl);
+      padding: 1.4rem 1.5rem;
+      box-shadow: var(--shadow-soft);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .card h2 {
+      font-size: 1.1rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .card h3 {
+      font-size: 0.95rem;
+      margin-top: 0.7rem;
+      margin-bottom: 0.2rem;
+    }
+
+    .card p {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    .card ul {
+      margin-top: 0.4rem;
+      padding-left: 1.1rem;
+      font-size: 0.88rem;
+      color: var(--text-muted);
+    }
+
+    .card ul li {
+      margin-bottom: 0.25rem;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .pill-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.3rem;
+      margin-top: 0.4rem;
+    }
+
+    .pill-list span {
+      font-size: 0.78rem;
+      padding: 0.26rem 0.6rem;
+      border-radius: 999px;
+      background: var(--bg-card-soft);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--text-muted);
+    }
+
+    .contact-block {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      margin-top: 0.6rem;
+      font-size: 0.9rem;
+    }
+
+    .contact-block a {
+      color: var(--accent);
+      text-decoration: underline;
+      text-decoration-style: dotted;
+      text-underline-offset: 2px;
+    }
+
+    footer {
+      width: 100%;
+      max-width: var(--max-width);
+      margin: 0 auto 1rem;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      padding-top: 0.8rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      justify-content: space-between;
+    }
+
+    footer span.standard {
+      font-family: "SF Mono", ui-monospace, Menlo, Monaco, Consolas, "Liberation Mono",
+        "Courier New", monospace;
+      font-size: 0.78rem;
+      color: #ffb347;
+    }
+  </style>
+</head>
+<body>
+  <!-- INTRO / STARTSEQUENZ -->
+  <div id="intro">
+    <!-- Dein Video/Animation hier (Datei/URL anpassen) -->
+    <video autoplay muted playsinline loop>
+      <!-- Ersetze src durch deine bestehende Produktion -->
+      <source src="intro.mp4" type="video/mp4" />
+      <!-- Fallback-Text -->
+      Dein Browser unterstützt kein HTML5-Video.
+    </video>
+
+    <div class="intro-overlay">
+      <div class="intro-logo">TEL1 · On-Air · Code · Inclusion</div>
+
+      <!-- Telefonnummer + Countdown -->
+      <div id="phone-sequence" aria-live="polite">
+        <div class="phone-label">
+          Global Net · T,.&amp;T,,. · TEL1
+        </div>
+        <div class="phone-number-main">
+          <span class="ext">T,.&amp;T,,.</span>
+          (+31) 613&nbsp;803&nbsp;782
+        </div>
+        <div class="countdown-shell">
+          <span id="countdown">10</span>
+          <small>seconds · seconden · Sekunden</small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HAUPT-APP / HUB -->
+  <div id="app">
+    <div class="app-shell">
+      <header class="app-header">
+        <div class="brand-block">
+          <a
+            href="https://tel1.jouwweb.nl"
+            target="_blank"
+            rel="noreferrer"
+            class="brand-mark"
+            aria-label="TEL1 Hauptseite auf tel1.jouwweb.nl"
+            >T,.</a
+          >
+          <div class="brand-text">
+            <strong>TEL1</strong>
+            <span>Live · Code · Inclusion · Music</span>
+          </div>
+        </div>
+        <nav class="main-nav">
+          <a href="#home">Home</a>
+          <a href="#about">Über TEL1 · Over TEL1</a>
+          <a href="#me">Über mich · Over mij</a>
+          <a href="#projects">Projekte · Projecten</a>
+          <a href="#music">Musik · Muziek</a>
+          <a href="#tech">Tech &amp; Code</a>
+          <a href="#inclusion">Inklusion · Inclusie</a>
+          <a href="#contact">Kontakt · Contact</a>
+        </nav>
+      </header>
+
+      <div class="language-hint">
+        Deutsch / Nederlands gemischt – für spätere Version kannst du hier einen Language-Switcher ergänzen.
+      </div>
+
+      <main>
+        <!-- HERO / HOME -->
+        <section id="home" class="hero-card">
+          <div class="hero-pill">
+            <span class="dot"></span>
+            <span>TEL1 · Hub · 24/7 · Live · On-Demand</span>
+          </div>
+          <h1 class="hero-title">
+            Alle Signale in einem Hub.<br />
+            Alle rollen in één centrum.
+          </h1>
+          <p class="hero-subtitle">
+            <span>Musik, Software, Kommunikation und Inklusion – gebündelt unter TEL1.</span>
+            <span>Muziek, ontwikkeling, communicatie &amp; inclusie – alles via één ingang.</span>
+          </p>
+
+          <div class="hero-tags">
+            <span>Musiker · Muzikant</span>
+            <span>Developer · Ontwikkelaar</span>
+            <span>Kommunikator · Communicator</span>
+            <span>Inklusion · Inclusie</span>
+          </div>
+
+          <div class="hero-actions">
+            <a href="#projects" class="btn-primary">
+              <span>Hub öffnen · Hub openen</span>
+            </a>
+            <a href="#contact" class="btn-ghost">
+              <span>Direktkontakt · Direct contact</span>
+            </a>
+          </div>
+        </section>
+
+        <!-- RIGHT COLUMN: About & Me -->
+        <div class="right-column">
+          <section id="about" class="card">
+            <h2>Über TEL1 · Over TEL1</h2>
+            <p>
+              TEL1 ist dein persönlicher Hub von Raymond Dimitrio – ein
+              flexibles System für Live-Formate, digitale Tools und kreative
+              Produktionen. Statt viele einzelne Links zu streuen, führt TEL1
+              alles zusammen: Musik, Code, Kommunikation und inklusive
+              Zusammenarbeit.
+            </p>
+            <p>
+              TEL1 is jouw centrale toegangspunt – één adres voor live streams,
+              content, tools, GitHub-projecten en samenwerkingen. Van snelle
+              prototypes tot volledige producties, alles start hier.
+            </p>
+            <ul>
+              <li>Ein Einstieg für alle Kanäle &amp; Apps.</li>
+              <li>Één hub voor social, web, tools en code.</li>
+              <li>Barrierebewusst, klar strukturiert, direkt.</li>
+            </ul>
+          </section>
+
+          <section id="me" class="card">
+            <h2>Über mich · Over mij</h2>
+            <h3>DE</h3>
+            <p>
+              Ich bin Raymond Dimitrio – Musiker, Entwickler und Kommunikator
+              mit einem Fokus auf inklusiven digitalen Räumen. Ich verbinde
+              Klang, Code und Community zu Formaten, die Menschen
+              zusammenbringen – unabhängig von Limitierungen.
+            </p>
+            <h3>NL</h3>
+            <p>
+              Ik ben Raymond Dimitrio – muzikant, ontwikkelaar en communicator
+              met een sterke focus op inclusieve digitale omgevingen. Ik
+              combineer geluid, code en community tot formats die mensen bij
+              elkaar brengen, voorbij beperkingen.
+            </p>
+            <ul>
+              <li>Musik &amp; Live-Performance · Muziek &amp; live-performance</li>
+              <li>Software &amp; Tools · Software &amp; tools</li>
+              <li>Sprache &amp; Moderation · Taal &amp; presentatie</li>
+              <li>Inklusion &amp; Zugang · Inclusie &amp; toegankelijkheid</li>
+            </ul>
+          </section>
+        </div>
+      </main>
+
+      <!-- PROJECTS / TGPA / MUSIC / TECH / INCLUSION / CONTACT -->
+      <section id="projects" class="card" style="margin-top: 1.6rem;">
+        <h2>Projekte &amp; Hubs · Projecten &amp; hubs</h2>
+        <p>
+          Hier bündeln sich deine wichtigsten Verteiler, Apps und Repositories.
+        </p>
+        <div class="grid">
+          <div class="card" style="padding: 1rem 1.1rem;">
+            <h3>Web · TEL1</h3>
+            <p>
+              Zentrale Startseite &amp; Landing. Von hier aus verteilst du
+              Nutzer:innen auf deine Live-Formate, Tools und Profile.
+            </p>
+            <ul>
+              <li><a href="https://tel1.nl" target="_blank" rel="noreferrer">TEL1.nl</a></li>
+              <li><a href="https://tel1.jouwweb.nl" target="_blank" rel="noreferrer">tel1.jouwweb.nl</a></li>
+            </ul>
+          </div>
+
+          <div class="card" style="padding: 1rem 1.1rem;">
+            <h3>Code · GitHub</h3>
+            <p>
+              Repositories, Experimente, Prototypen und öffentliche Tools.
+            </p>
+            <ul>
+              <li><a href="https://github.com/viewunity" target="_blank" rel="noreferrer">github.com/viewunity</a></li>
+              <li><a href="https://github.com/Kean-myopenai" target="_blank" rel="noreferrer">github.com/Kean-myopenai</a></li>
+            </ul>
+          </div>
+
+          <div class="card" style="padding: 1rem 1.1rem;">
+            <h3>Social &amp; Community</h3>
+            <p>Direkte Kanäle für Updates, Austausch, Sessions &amp; Feedback.</p>
+            <div class="pill-list">
+              <span>LinkedIn</span>
+              <span>Facebook</span>
+              <span>Twitter / X</span>
+              <span>Instagram</span>
+              <span>WhatsApp</span>
+            </div>
+            <p style="margin-top:0.5rem;">
+              Links kannst du hier später direkt verlinken oder als QR-Codes darstellen.
+            </p>
+          </div>
+
+          <div class="card" style="padding: 1rem 1.1rem;">
+            <h3>On-Air &amp; Live</h3>
+            <p>
+              Live-Streams, Audio-Formate und interaktive Sessions – dein
+              On-Air-Bereich, inspiriert von deiner bestehenden OnAir-Produktion.
+            </p>
+            <p>
+              Du kannst hier direkt auf deinen On-Air-Hub verlinken oder ein
+              eingebettetes Dashboard einbauen.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section id="tgpa" class="card" style="margin-top: 1rem;">
+        <h2>Global Net Extension Standards · TGPA</h2>
+        <h3>DE – Kurzüberblick</h3>
+        <p>
+          Die <strong>T-Systems Global Provider Alliance (TGPA)</strong> ist ein makroökonomisches
+          Konzept, das <strong>alle Provider weltweit</strong> – Telekommunikation, Internet, Broadcasting,
+          Satelliten, Cloud – unter einem gemeinsamen Dachkonzern bündelt. Ziel ist ein
+          <strong>global stabiles Kommunikationsnetz</strong>, drastisch reduzierte Redundanzkosten
+          und die Rückführung der Überschüsse an die Allgemeinheit, insbesondere an die ärmsten Regionen.
+        </p>
+        <p>
+          Statt tausender getrennter Infrastrukturen mit 85–90&nbsp;% Gesamtkostenquote sieht TGPA
+          ein gemeinsames Netz mit geteilter Infrastruktur, zentraler Frequenzverwaltung und
+          standardisierten IT‑Systemen vor. Damit können laut Modell jährlich bis zu
+          <strong>1,78 Billionen USD</strong> eingespart und als globaler Effizienzgewinn neu verteilt werden.
+        </p>
+        <p>
+          Dieses Konzept ist <strong>nicht proprietär</strong>, soll <strong>keiner klassischen Lizenz</strong>
+          unterliegen und allen Providern weltweit offenstehen. Die <strong>IPU</strong> (Inter Provider Union)
+          berät hierbei mit Regulierungsbehörden – insbesondere in Europa mit den zuständigen Stellen der
+          Europäischen Union für mobile Kommunikation. Alle Vorab‑Veröffentlichungen sind dort bereits platziert.
+        </p>
+
+        <h3>EN – Executive Summary (for international guests)</h3>
+        <p>
+          <strong>T-Systems Global Provider Alliance (TGPA)</strong> is a visionary concept to align all
+          <em>telecom, internet, broadcasting, satellite and cloud providers</em> under one global umbrella.
+          The goal is to massively reduce redundant cost structures, stabilize the worldwide communication grid
+          and channel the majority of the resulting surplus back to humanity – especially to the poorest regions.
+        </p>
+        <p>
+          Today’s highly fragmented provider landscape creates duplicated networks, parallel R&amp;D and oversized
+          marketing/administration overheads, leading to a global cost ratio of roughly 85–90&nbsp;% on about
+          <strong>3.7 trillion USD</strong> yearly revenue. In the TGPA model, a unified infrastructure, centralized
+          spectrum management and standardized IT &amp; service processes could lower this to about 42&nbsp;%,
+          unlocking an estimated <strong>1.78 trillion USD</strong> in yearly efficiency gains.
+        </p>
+        <p>
+          TGPA is designed as a <strong>macro‑economic, open and non‑exclusive framework</strong> that must not be
+          locked behind private licenses. Any provider may join; regulators and public institutions are explicitly
+          invited to co‑shape the governance model. The concept is already communicated to European regulators for
+          mobile communication and related bodies.
+        </p>
+
+        <h3>Downloads &amp; Business Hub</h3>
+        <ul>
+          <li>
+            <strong>Businessplan (DE, PDF):</strong>
+            <a
+              href="https://github.com/T-T-T-Sysytems-T-T-T-Systems-com-T-T/.github/blob/main/TGPA_Businessplan_DE.pdf"
+              target="_blank"
+              rel="noreferrer"
+              >TGPA_Businessplan_DE.pdf</a
+            >
+          </li>
+          <li>
+            <strong>Executive Summary (EN):</strong> auf dieser Seite (siehe oben) und vorbereitet zur
+            PDF‑Erstellung im mehrsprachigen TGPA‑Dokument.
+          </li>
+          <li>
+            <strong>Business Hub (Beta, 24/7 online/offline):</strong>
+            <a href="https://businesshub.web.app/" target="_blank" rel="noreferrer"
+              >https://businesshub.web.app/</a
+            >
+          </li>
+        </ul>
+      </section>
+
+      <section id="music" class="card" style="margin-top: 1rem;">
+        <h2>Musik · Muziek</h2>
+        <h3>DE</h3>
+        <p>
+          Musik ist der Kern deiner Arbeit – von spontanen Sessions bis zu
+          strukturierten Produktionen. TEL1 gibt dieser Energie eine Bühne:
+          Live-Sets, Recordings und kollaborative Projekte können hier gestartet
+          werden.
+        </p>
+        <h3>NL</h3>
+        <p>
+          Muziek is de kern van je werk – van spontane sessies tot uitgewerkte
+          producties. Via TEL1 krijgen deze projecten een duidelijke plek:
+          live-sets, opnames en samenwerkingen starten hier.
+        </p>
+      </section>
+
+      <section id="tech" class="card" style="margin-top: 1rem;">
+        <h2>Tech &amp; Code</h2>
+        <p>
+          Du arbeitest mit GitHub, Prototypen und Tools, die oft direkt mit
+          deiner kreativen Arbeit verbunden sind. TEL1 verbindet:
+        </p>
+        <ul>
+          <li>Experimente mit KI und Open-Source-Libraries.</li>
+          <li>Tools für Audio, Visualisierung und Kommunikation.</li>
+          <li>Dokumentation, Repositories und Deployments.</li>
+        </ul>
+        <p>
+          Auf dieser Seite kannst du später direkte Buttons zu einzelnen Tools,
+          Demos und Clients einbauen.
+        </p>
+      </section>
+
+      <section id="inclusion" class="card" style="margin-top: 1rem;">
+        <h2>Inklusion · Inclusie</h2>
+        <h3>DE</h3>
+        <p>
+          Inklusion ist kein Zusatz, sondern Basis deines Hubs. TEL1 ist so
+          gedacht, dass Menschen mit unterschiedlichen Fähigkeiten, Sprachen und
+          Zugängen mitgenommen werden – von klarer Sprache bis zu
+          barrierebewussten Oberflächen.
+        </p>
+        <h3>NL</h3>
+        <p>
+          Inclusie is geen extra laag maar een basis. TEL1 is ontworpen om
+          mensen met verschillende mogelijkheden, talen en manieren van toegang
+          mee te nemen – met duidelijke taal en toegankelijke interfaces.
+        </p>
+      </section>
+
+      <section id="contact" class="card" style="margin-top: 1rem;">
+        <h2>Kontakt · Contact</h2>
+        <p>
+          Direkt, persönlich und ohne Umwege. TEL1 ist dein direkter Draht.
+        </p>
+        <div class="contact-block">
+          <div>
+            <strong>TEL1 · Global Net Number</strong><br />
+            <span>T,.&amp;T,,. (+31) 613&nbsp;803&nbsp;782</span>
+          </div>
+          <div>
+            Telefon / WhatsApp:<br />
+            <a href="tel:+31613803782">+31 6 1380 3782</a> ·
+            <a href="https://wa.me/31613803782" target="_blank" rel="noreferrer"
+              >WhatsApp öffnen</a
+            >
+          </div>
+          <div>
+            E-Mail (Beispiel):<br />
+            <a href="mailto:x@tel1.nl">x@tel1.nl</a>
+          </div>
+          <div>
+            Social Media (Platzhalter – hier deine echten Profile verlinken):<br />
+            LinkedIn · Facebook · Twitter/X · Instagram
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <footer>
+      <span>© TEL1 · Raymond Dimitrio · Live · Code · Inclusion · Music</span>
+      <a
+        href="https://github.com/T-T-T-Sysytems-T-T-T-Systems-com-T-T/.github/blob/main/TGPA_Businessplan_DE.pdf"
+        target="_blank"
+        rel="noreferrer"
+        class="standard"
+        >T,.&amp;T,,. · TcomaTpoinT · Global Net Extension Standard</a
+      >
+    </footer>
+  </div>
+
+  <script>
+    // Intro-Ablauf:
+    // 1) Kleine Verzögerung (Video wirken lassen)
+    // 2) Telefonnummer-Sequence aktivieren
+    // 3) 10-Sekunden-Countdown
+    // 4) Explosion und App anzeigen
+
+    const intro = document.getElementById("intro");
+    const phoneSequence = document.getElementById("phone-sequence");
+    const countdownEl = document.getElementById("countdown");
+    const app = document.getElementById("app");
+
+    let countdownValue = 10;
+
+    function startPhoneSequence() {
+      phoneSequence.classList.add("active");
+
+      const timer = setInterval(() => {
+        countdownValue--;
+        if (countdownValue < 0) {
+          clearInterval(timer);
+          triggerExplosion();
+        } else {
+          countdownEl.textContent = countdownValue;
+        }
+      }, 1000);
+    }
+
+    function triggerExplosion() {
+      intro.classList.add("explode");
+
+      setTimeout(() => {
+        intro.style.display = "none";
+        app.classList.add("visible");
+        document.body.style.overflowY = "auto";
+      }, 900); // passend zur Animationsdauer
+    }
+
+    // Start nach kurzer Pause (z.B. 3 Sekunden Video-Intro)
+    window.addEventListener("load", () => {
+      setTimeout(startPhoneSequence, 3000);
+    });
+  </script>
+</body>
+</html>
